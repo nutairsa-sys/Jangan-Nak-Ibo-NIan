@@ -60,7 +60,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(330,330,fa
 const scene=new T.Scene(),camera=new T.OrthographicCamera(-2.25,2.25,2.25,-2.25,.1,30);camera.position.set(0,.2,8);camera.lookAt(0,0,0);
 const owl=new T.Group();scene.add(owl);
 const mat=(color,metalness=0)=>new T.MeshStandardMaterial({color,metalness,roughness:metalness?.34:.7});
-const ivory=mat(0xf2e8d7), shadow=mat(0xc5bac3),purple=mat(0x522687),gold=mat(0xf5bc59,.55),amber=mat(0xffa826),dark=mat(0x211925),wood=mat(0x51352e),jade=mat(0x169974,.25);
+const ivory=mat(0xede5d5), shadow=mat(0xc5bac3),purple=mat(0x522687),gold=mat(0xf5bc59,.55),amber=mat(0xffa826),dark=mat(0x211925),wood=mat(0x51352e),jade=mat(0x169974,.25);
 const unit=new T.SphereGeometry(1,28,20);
 function mesh(parent,geo,material,x,y,z){const m=new T.Mesh(geo,material);m.position.set(x,y,z);parent.add(m);return m}
 function oval(p,m,x,y,z,a,b,c){const o=mesh(p,unit,m,x,y,z);o.scale.set(a,b,c);return o}
@@ -69,14 +69,27 @@ function pole(p,m,coords,r){const curve=new T.CatmullRomCurve3(coords.map(v=>new
 oval(owl,purple,0,-.34,0,.54,.69,.43);oval(owl,ivory,0,-.18,.19,.43,.51,.36);
 for(const side of [-1,1]){const panel=oval(owl,purple,side*.35,-.55,.32,.14,.58,.12);panel.rotation.z=side*.13;pole(owl,gold,[[side*.22,-.04,.46],[side*.29,-.53,.47],[side*.37,-1.08,.38]],.027);oval(owl,gold,side*.21,-.97,.04,.14,.09,.15)}
 pole(owl,gold,[[-.32,-.12,.52],[0,-.4,.57],[.32,-.12,.52]],.025);oval(owl,jade,0,-.4,.58,.08,.1,.04);
+const neckStart=owl.children.length;
 oval(owl,ivory,0,.37,0,.66,.59,.52);
 for(const side of [-1,1]){const x=side*.275;oval(owl,ivory,x,.32,.4,.32,.33,.17);oval(owl,amber,x,.37,.54,.205,.218,.10);oval(owl,dark,x,.37,.625,.127,.15,.05);oval(owl,ivory,x-.043,.43,.674,.041,.041,.016);hoop(owl,dark,x,.37,.6,.258,.027)}pole(owl,dark,[[-.052,.39,.6],[0,.42,.62],[.052,.39,.6]],.026);const beak=mesh(owl,new T.ConeGeometry(.096,.19,12),mat(0xd78d6e),0,.155,.58);beak.rotation.z=Math.PI;
 const hat=new T.Group();hat.position.y=.78;hat.rotation.z=.10;owl.add(hat);oval(hat,gold,0,0,0,.92,.067,.65);oval(hat,purple,0,.027,0,.90,.071,.635);
 const rings=[[.57,.02,0],[.48,.23,0],[.35,.52,-.04],[.23,.76,-.16],[.14,.85,-.32],[.065,.78,-.49],[.006,.68,-.56]],v=[],ix=[];for(let j=0;j<rings.length;j++){const [r,y,x]=rings[j];for(let k=0;k<=40;k++){const a=k*Math.PI/20;v.push(x+r*Math.cos(a),y,r*.88*Math.sin(a));if(j&&k){const n=j*41+k;ix.push(n-42,n-1,n,n-42,n,n-41)}}}const hatGeo=new T.BufferGeometry();hatGeo.setAttribute('position',new T.Float32BufferAttribute(v,3));hatGeo.setIndex(ix);hatGeo.computeVertexNormals();purple.side=T.DoubleSide;mesh(hat,hatGeo,purple,0,0,0);const band=mesh(hat,new T.CylinderGeometry(.49,.54,.115,48),gold,0,.15,0);band.scale.z=.88;
+const headPivot=new T.Group();headPivot.position.y=.28;const faceParts=owl.children.slice(neckStart);owl.add(headPivot);faceParts.forEach(part=>headPivot.attach(part));
 const wings=[];for(const side of [-1,1]){const g=new T.Group();owl.add(g);g.position.set(side*.43,-.15,-.07);wings.push(g);for(let j=0;j<6;j++){const f=oval(g,j%2?ivory:shadow,side*(.35+j*.09),.13-j*.10,-j*.017,.59-j*.023,.114,.115);f.rotation.z=side*(.34-j*.075)}oval(g,ivory,side*.26,.04,.025,.4,.21,.17)}
 pole(owl,wood,[[-.64,-.75,.35],[-.91,-.2,.37],[-1.18,.21,.36],[-1.52,.39,.35],[-1.58,.54,.35],[-1.48,.6,.35]],.06);
 const lamp=new T.Group();lamp.position.set(-1.5,.42,.35);owl.add(lamp);hoop(lamp,gold,0,-.1,0,.09,.022);mesh(lamp,new T.ConeGeometry(.24,.16,8),gold,0,-.25,0);mesh(lamp,new T.CylinderGeometry(.19,.17,.07,8),gold,0,-.64,0);for(let k=0;k<4;k++){let a=k*Math.PI/2+.78;mesh(lamp,new T.CylinderGeometry(.016,.016,.36,8),gold,.17*Math.cos(a),-.45,.17*Math.sin(a))}const flame=new T.MeshStandardMaterial({color:0xffeb99,emissive:0xffab37,emissiveIntensity:1.6});oval(lamp,flame,0,-.47,0,.087,.16,.08);const glow=new T.PointLight(0xffba61,3,4);lamp.add(glow);glow.position.y=-.45;
-scene.add(new T.HemisphereLight(0xfff1d8,0xa9a0c9,2));const key=new T.DirectionalLight(0xffe2aa,2.5);key.position.set(-3,4,5);scene.add(key);const rim=new T.DirectionalLight(0xabbfff,2);rim.position.set(3,2,-2);scene.add(rim);
-const reduce=matchMedia('(prefers-reduced-motion: reduce)');function draw(ms){let t=reduce.matches?0:ms*.001;owl.rotation.y=.22+.43*Math.sin(t*.76);owl.rotation.z=.06*Math.sin(t);wings.forEach((g,j)=>g.rotation.z=(j?1:-1)*(.12+.48*Math.sin(t*4)));lamp.rotation.z=.12*Math.sin(t*2);renderer.render(scene,camera)}draw(0);drawing.after(canvas);drawing.hidden=true;drawing.style.display='none';canvas.dataset.rendered='3d';let visible=true;function playback(){renderer.setAnimationLoop(visible&&!document.hidden&&!reduce.matches?draw:null);if(visible)draw(0)}new IntersectionObserver(([e])=>{visible=e.isIntersecting;playback()}).observe(canvas);document.addEventListener('visibilitychange',playback);reduce.addEventListener('change',playback);
+scene.add(new T.HemisphereLight(0xffedda,0x79859e,1.45));const key=new T.DirectionalLight(0xffe2aa,2.5);key.position.set(-3,4,5);scene.add(key);const rim=new T.DirectionalLight(0xabbfff,2);rim.position.set(3,2,-2);scene.add(rim);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)');function draw(ms){
+ const t=reduce.matches?0:ms*.001;
+ const effort=T.MathUtils.smoothstep(Math.sin(t*.87+.68*Math.sin(t*.21)),-.44,.52);
+ const phase=t*7.4+.5*Math.sin(t*1.2), beat=Math.sin(phase+.22*Math.sin(phase));
+ const bank=.11*Math.sin(t*.46)+.035*Math.sin(t*.93);
+ owl.rotation.set(.045*beat*effort,.18+.38*Math.sin(t*.45),bank);
+ owl.position.y=.065*Math.sin(t*.86)-.052*Math.cos(phase)*effort;
+ headPivot.rotation.set(-owl.rotation.x*.78,.075*Math.sin(t*.69)-owl.rotation.y*.23,-bank*.8);
+ wings.forEach((wing,j)=>{const side=j?1:-1;wing.rotation.z=side*(.14+effort*.57*beat);wing.rotation.y=side*(.09+.14*effort*Math.cos(phase));wing.scale.x=1-.10*effort*(1+Math.cos(phase))/2;});
+ lamp.rotation.z=-.13*Math.sin((t-.32)*.46)+.046*effort*Math.sin(phase-.86);
+ renderer.render(scene,camera);
+}draw(0);drawing.after(canvas);drawing.hidden=true;drawing.style.display='none';canvas.dataset.rendered='3d';let visible=true;function playback(){renderer.setAnimationLoop(visible&&!document.hidden&&!reduce.matches?draw:null);if(visible)draw(0)}new IntersectionObserver(([e])=>{visible=e.isIntersecting;playback()}).observe(canvas);document.addEventListener('visibilitychange',playback);reduce.addEventListener('change',playback);
 </script>
 </body></html>
