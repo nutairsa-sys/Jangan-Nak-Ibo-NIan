@@ -1,5 +1,4 @@
-// Isi setelah membuat proyek Supabase. URL dan anon key boleh tampil di frontend; JANGAN masukkan service_role key.
 window.JNI_BACKEND_CONFIG = {
-  supabaseUrl: 'https://PROJECT-ID.supabase.co',
-  supabaseAnonKey: 'SUPABASE_ANON_PUBLIC_KEY'
+  supabaseUrl: 'https://yifdjktigwwiiapmoomb.supabase.co',
+  supabaseAnonKey: 'sb_publishable_ZCG5h5dL2qmRPesu5VVv5w_OU0J493b'
 };
